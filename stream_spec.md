@@ -2,11 +2,15 @@
 
 This document defines the behaviour that a `Stream` must implement in order to be compatible with `Stream#pipe`. This is not an official document, but is intended as a guide to produce correct behaviour in user-land streams.
 
-This guide has three sections. Rules that apply to all streams whether they are readable or writable, to writable streams, and to readable streams. Note that it is possible for a stream to be both readable _and_ writable.
+This guide has three sections. Rules that apply to all streams whether they are readable or writable, to writable streams, and to readable streams. 
+
+* Note that it is possible for a stream to be both readable _and_ writable.
 
 ## Stream
 
-All streams *may* emit `'error'` and `'close'`. All streams *may* implement `destroy` but a `WritableStream` *must* implement `destroy`.
+All streams *may* emit `'error'` and `'close'`. All streams *may* implement `destroy` but a `WritableStream` *must* implement `destroy`. All streams *must* inherit from `Stream`.
+
+* Stream is an EventEmitter, with the addition of the `pipe` method.
 
 ### emit('close')
 
@@ -40,7 +44,7 @@ Calling `destroy` *must* cause `'close'` or `'end'` to be emitted, and *should* 
 
 ## ReadableStream
 
-A `ReadableStream` *must* inherit `pipe`* from `Stream`, and set `readable` to `true`, and *must* emit zero or more 'data' events, followed by a single `end` event. A `ReadableStream` *may* implement `pause` and `resume` methods.
+A `ReadableStream` *must* inherit `pipe` from `Stream`, and set `readable` to `true`, and *must* emit zero or more 'data' events, followed by a single `end` event. A `ReadableStream` *may* implement `pause` and `resume` methods.
 
 * I will not bother to specify the behaviour of `pipe` because I am attempting to document what must be done in order for your `Stream` to be compatible with `pipe`.
 
