@@ -1,26 +1,26 @@
 # a `Stream` spec
 
-This document defines the behaviour that a stream must implement in order to be compatible with `Stream#pipe`. This is not an official document, but is intended as a guide to produce correct behaviour in user-land streams.
+This document defines the behaviour that a `Stream` must implement in order to be compatible with `Stream#pipe`. This is not an official document, but is intended as a guide to produce correct behaviour in user-land streams.
 
-this guide has three sections. Rules that apply to writable streams, readable streams, and to all streams whether they are readable or writable. note that it is possible for a stream to be both readable _and_ writable.
+This guide has three sections. Rules that apply to all streams whether they are readable or writable, to writable streams, and to readable streams. Note that it is possible for a stream to be both readable _and_ writable.
 
 ## Stream
 
-All `Stream`s *may* emit `'error'` and `'close'`. All `Stream`s *may* implement `destroy` but a writable stream *must* implement `destroy`.
+All streams *may* emit `'error'` and `'close'`. All streams *may* implement `destroy` but a `WritableStream` *must* implement `destroy`.
 
 ### emit('close')
 
-When it is no longer possible to read or write from the stream, the stream *must* emit `'close'`. Usually this is when it is physically impossible to read or write to the stream, because in underlying resource is no longer available; for example, a disk is full, a connection is lost, or a process has terminated.
+When it is no longer possible to read or write from the `Stream`, the `Stream` *must* emit `'close'`. Usually this is when it is physically impossible to read or write to the `Stream`, because in underlying resource is no longer available; for example, a disk is full, a connection is lost, or a process has terminated.
 
 ### emit('error')
 
-All `Stream`s *should* emit `'error'` when an unexpected error has occurred.
-All  `Stream`s *must not* throw an error, unless `write` has been called after `end`.
+All streams *should* emit `'error'` when an unexpected error has occurred.
+All  streams *must not* throw an error, unless `write` has been called after `end`.
 (which should never happen, in correct usage)
 
 ## WritableStream
 
-A writable stream *must* implement methods `write`, `end`, and `destroy`, and `writable` *must* be set to `true`, and *must* inherit `Stream#pipe`
+A `WritableStream` *must* implement methods `write`, `end`, and `destroy`, and `writable` *must* be set to `true`, and *must* inherit `Stream#pipe`
 
 ### write(data)
 
@@ -31,12 +31,12 @@ If `write` is called after end, an error *may* be thrown.
 ### end()
 
 calling `end` *may* set `writable` to `false`. 
-If the stream is also readable, it *may* eventually emit 'end'.
+If the `Stream` is also readable, it *may* eventually emit 'end'.
 
 ### destroy()
 
-used to close a stream prematurely. 
-calling destroy *must* cause `'close'` or `'end'` to be emitted, and *should* clean up any underling resources.
+Used to close a `Stream` prematurely. 
+Calling `destroy` *must* cause `'close'` or `'end'` to be emitted, and *should* clean up any underling resources.
 
 ## ReadableStream
 
@@ -58,5 +58,4 @@ A readable `Stream` *may* implement the `pause` method. When `pause` is called, 
 
 ### resume()
 
-A readable `Stream` *may* implement the `resume` method. If the stream has been paused, it may now emit `'data'` more often.
-
+A `ReadableStream` *may* implement the `resume` method. If the `Stream` has been paused, it may now emit `'data'` more often, or commence emitting `data` if it has stopped all together.
