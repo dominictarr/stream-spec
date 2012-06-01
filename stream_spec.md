@@ -72,6 +72,14 @@ A readable `Stream` *may* implement the `pause` method. When `pause` is called, 
 
 A `ReadableStream` *may* implement the `resume` method. If the `Stream` has been paused, it may now emit `'data'` more often, or commence emitting `data` if it has stopped all together.
 
+### destroy()
+
+A `ReadableStream` *should* implement `destroy`.
+
+Calling `destroy` *must* dispose of any underlying resources.
+Calling `destroy` *must* emit `'close'` eventually, 
+once any underlying resources are disposed of.
+
 ## request for comment
 
 thank you in advance!
