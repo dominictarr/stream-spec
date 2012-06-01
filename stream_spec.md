@@ -40,8 +40,9 @@ Calling `destroy` *must* cause `'close'` or `'end'` to be emitted, and *should* 
 
 ## ReadableStream
 
-A `ReadableStream` *must* set `readable` to `true`, and *must* emit zero or more 'data' events, followed by a single `end` event.
-A `ReadableStream` *may* implement `pause` and `resume` methods.
+A `ReadableStream` *must* inherit `pipe`* from `Stream`, and set `readable` to `true`, and *must* emit zero or more 'data' events, followed by a single `end` event. A `ReadableStream` *may* implement `pause` and `resume` methods.
+
+* I will not bother to specify the behaviour of `pipe` because I am attempting to document what must be done in order for your `Stream` to be compatible with `pipe`.
 
 ### emit('data', data)
 
@@ -59,3 +60,7 @@ A readable `Stream` *may* implement the `pause` method. When `pause` is called, 
 ### resume()
 
 A `ReadableStream` *may* implement the `resume` method. If the `Stream` has been paused, it may now emit `'data'` more often, or commence emitting `data` if it has stopped all together.
+
+## request for comment
+
+thank you in advance!
