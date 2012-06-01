@@ -28,12 +28,12 @@ A writable stream *must* implement methods `write`, `end`, and `destroy`, and `w
 (if `false` then the writer *should* pause)
 If `write` is called after end, an error *may* be thrown.
 
-### `end()`
+### end()
 
 calling `end` *may* set `writable` to `false`. 
 If the stream is also readable, it *may* eventually emit 'end'.
 
-### `destroy`
+### destroy()
 
 used to close a stream prematurely. 
 calling destroy *must* cause `'close'` or `'end'` to be emitted, and *should* clean up any underling resources.
@@ -52,10 +52,11 @@ A `ReadableStream` *must not* emit emit a `'data'` event after it has emitted `'
 
 A `ReadableStream` *should* emit an `'end'` event when it is not going to emit any more `'data'` events. `'end'` *must not* be emitted more than once. A `ReadableStream` may set `readable` to `false` after it has emitted the `'end'` event.
 
-### pause
+### pause()
 
 A readable `Stream` *may* implement the `pause` method. When `pause` is called, the stream should attempt to emit `'data'` less often. (possibly stopping altogether until `resume` is called)
 
-### resume
+### resume()
+
 A readable `Stream` *may* implement the `resume` method. If the stream has been paused, it may now emit `'data'` more often.
 
