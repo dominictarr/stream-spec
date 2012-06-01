@@ -57,7 +57,7 @@ A `ReadableStream` *must* inherit `pipe` from `Stream`, and set `readable` to `t
 
 ### emit('data', data)
 
-A `ReadableStream` *may* emit zero or more `'data'` events.
+A `ReadableStream` *may* emit one or more `'data'` events.
 A `ReadableStream` *must not* emit emit a `'data'` event after it has emitted `'end'` 
 
 ### emit('end')
