@@ -8,19 +8,23 @@ This guide has three sections. Rules that apply to all streams whether they are 
 
 ## Stream
 
-All streams *may* emit `'error'` and `'close'`. All streams *may* implement `destroy` but a `WritableStream` *must* implement `destroy`. All streams *must* inherit from `Stream`.
+All streams *must* emit `'error'` if writing to or reading from becomes physically impossible. `'error'` implys that the stream has ended.
 
-* Stream is an EventEmitter, with the addition of the `pipe` method.
+All streams *may* emit `'close'`. `'close'` means that any underlying resources have been disposed of. 
 
-### emit('close')
+A `Stream` *must not* emit `'error'` if the error is recoverable. 
+(that is not in the stream spec)
 
-When it is no longer possible to read or write from the `Stream`, the `Stream` *must* emit `'close'`. Usually this is when it is physically impossible to read or write to the `Stream`, because in underlying resource is no longer available; for example, a disk is full, a connection is lost, or a process has terminated.
+All streams *should* implement `destroy` but a `WritableStream` *must* implement `destroy`.
 
 ### emit('error')
 
-All streams *should* emit `'error'` when an unexpected error has occurred.
-All  streams *must not* throw an error, unless `write` has been called after `end`.
+All streams *must* emit `'error'` when an error that is not recoverable has occurred. If it has become physically impossible to write to or read from the `Stream`, then emit `'error'`.
+
+A `WriteableStream` *may* throw an error if `write` has been called after `end`.
 (which should never happen, in correct usage)
+
+otherwise, a stream *must never* throw an error. (always emit)
 
 ## WritableStream
 
@@ -35,12 +39,15 @@ If `write` is called after end, an error *may* be thrown.
 ### end()
 
 calling `end` *may* set `writable` to `false`. 
-If the `Stream` is also readable, it *may* eventually emit 'end'.
+If the `Stream` is also readable, it *must* eventually emit 'end'.
 
 ### destroy()
 
-Used to close a `Stream` prematurely. 
-Calling `destroy` *must* cause `'close'` or `'end'` to be emitted, and *should* clean up any underling resources.
+Used to dispose of a `Stream`.
+
+Calling `destroy` *must* dispose of any underlying resources.
+Calling `destroy` *must* emit `'close'` eventually, 
+once any underlying resources are disposed of.
 
 ## ReadableStream
 
