@@ -2,15 +2,11 @@
 
 This document defines the behaviour that a `Stream` must implement in order to be compatible with `Stream#pipe`. This is not an official document, but is intended as a guide to produce correct behaviour in user-land streams.
 
-This guide has three sections. Rules that apply to all streams whether they are readable or writable, to writable streams, and to readable streams. 
-
-* Note that it is possible for a stream to be both readable _and_ writable.
-
 ## Stream
 
 All streams *must* emit `'error'` if writing to or reading from becomes physically impossible. `'error'` implys that the stream has ended.
 
-All streams *may* emit `'close'`. `'close'` means that any underlying resources have been disposed of. 
+All streams *may* emit `'close'`. `'close'` means that any underlying resources have been disposed of. If a `ReadableStream` has ended normally, it *must not* emit `'close'` before `'end'`.
 
 A `Stream` *must not* emit `'error'` if the error is recoverable. 
 (that is not in the stream spec)
