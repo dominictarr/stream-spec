@@ -32,9 +32,11 @@ A `WritableStream` *must* implement methods `write`, `end`, and `destroy`, and `
 (if `false` then the writer *should* pause)
 If `write` is called after end, an error *may* be thrown.
 
+If `write` returns `false`,it *must* eventually emit `'drain'`. `write` returning `false` means the stream is paused. paused means (or downstream) is at capacity, and the writer/upstream *should attempt* to slow down or stop. It does not mean buffer, although that is something a stream may reasonably do.
+
 ### end()
 
-calling `end` *may* set `writable` to `false`. 
+Calling `end` *may* set `writable` to `false`. 
 If the `Stream` is also readable, it *must* eventually emit 'end'.
 
 ### destroy()
@@ -44,6 +46,13 @@ Used to dispose of a `Stream`.
 Calling `destroy` *must* dispose of any underlying resources.
 Calling `destroy` *must* emit `'close'` eventually, 
 once any underlying resources are disposed of.
+
+
+### emit ('drain')
+
+After pausing, a `Stream` must eventually emit `'drain'`. For example, when if a call to `write` returns `false` `Stream#pipe` will call `pause` on the source and  register a one-time listener on `drain`, that will call `resume` on the source.
+
+If drain is not emitted correctly, it's possible for `'data'` events to stop coming (depending on the source's behaviour when paused).
 
 ## ReadableStream
 
@@ -67,6 +76,8 @@ A readable `Stream` *may* implement the `pause` method. When `pause` is called, 
 ### resume()
 
 A `ReadableStream` *may* implement the `resume` method. If the `Stream` has been paused, it may now emit `'data'` more often, or commence emitting `data` if it has stopped all together.
+
+If a stream is also writable, and has returned `false` on `write` it *must* now eventually emit `drain`
 
 ### destroy()
 
