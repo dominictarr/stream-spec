@@ -69,6 +69,12 @@ A `ReadableStream` *must not* emit emit a `'data'` event after it has emitted `'
 
 A `ReadableStream` *should* emit an `'end'` event when it is not going to emit any more `'data'` events. `'end'` *must not* be emitted more than once. A `ReadableStream` may set `readable` to `false` after it has emitted the `'end'` event.
 
+### emit ('close')
+
+A `ReadableStream` *must* emit a `'close'` event after the `'end'` event. `'close'` *must* only be emitted once. if `destroy` is called, `'close'` must be emitted, unless the stream has already ended normally. If `'close'` is emitted before `'end'` that signifies a broken stream, this *should* only happen if `destroy` was called. 
+
+Emitting close will cause `pipe` to call `destroy` on the down stream pipe, if it is emitted before `end`. 
+
 ### pause()
 
 A readable `Stream` *may* implement the `pause` method. When `pause` is called, the stream should attempt to emit `'data'` less often. (possibly stopping altogether until `resume` is called)
