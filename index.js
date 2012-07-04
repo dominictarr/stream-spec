@@ -13,14 +13,18 @@ module.exports = function (stream) {
   }
 
   add('through', throughSpec)
+  add('readable', readableSpec)
+  add('writable', writableSpec)
   add('basic', throughSpec)
   add('readableWritable', throughSpec)
   add('pausable', pauseSpec)
+  add('strictPausable', strictPauseSpec)
+
   spec.all = function (opts) {
     if(stream.writable && stream.readable)
       return this.through(opts).pausable(opts)
     else if(stream.writable)
-      return this.writable()
+      return this.writable().pausable()
     else
       return this.readable()
   }
@@ -48,35 +52,54 @@ module.exports = function (stream) {
   return spec
 }
 
-function throughSpec (mac, stream, opts) {
+function writableSpec (mac, stream, opts) {
   opts = opts || {end: true}
-  function noop () {}
-  var paused = false
-  stream.end = mac(stream.end).once()
 
+  stream.end = mac(stream.end).once()
   stream.write = 
     mac(stream.write)
     .throws(function (err, threw) {
       a.equal(threw, !stream.writable)
     })
 
-  if(stream.readable) {
-    var onClose = mac(function close(){}).once()
-    var onError = mac(function error(){}).before(onClose)
-    var onEnd   = mac(function end  (){}).before(onClose).before(onError)
-    var onData  = mac(function data (){}).before(onEnd)
-  }
-  
+  var onClose = mac(function close(){}).once()
+  var onError = mac(function error(){}).before(onClose)
+
+  stream.on('close', onClose)
+  stream.on('error', onError)
+
+  if(opts.error === false)
+    onError.never()
+  if(opts.error === true)
+    onError.once() 
+}
+
+function readableSpec (mac, stream, opts) {
+
+  opts = opts || {end: true}
+
+  var onClose = mac(function close(){}).once()
+  var onError = mac(function error(){}).before(onClose)
+  var onEnd   = mac(function end  (){}).before(onClose).before(onError)
+  var onData  = mac(function data (){}).before(onEnd)
+
+  stream.on('close', onClose)
+  stream.on('end', onEnd)
+  stream.on('data', onData)
+
   if(opts.end)
     onEnd.once()
+
   if(opts.error === false)
     onError.never()
   if(opts.error === true)
     onError.once() 
 
-  stream.on('close', onClose)
-  stream.on('end', onEnd)
-  stream.on('data', onData)
+}
+
+function throughSpec (mac, stream, opts) {
+  writableSpec(mac, stream, opts)
+  readableSpec(mac, stream, opts)
 }
 
 function pauseSpec (mac, stream, opts) {
@@ -88,6 +111,9 @@ function pauseSpec (mac, stream, opts) {
   var onDrain = mac(drain).never()
   
   a.ok(stream.pause, 'stream *must* have pause')
+
+  if(!stream.readable)
+    throw new Error('strict pause does not make sense for a non-readable stream')
 
   stream.pause = mac(stream.pause)
     .isPassed(function () {
@@ -106,7 +132,6 @@ function pauseSpec (mac, stream, opts) {
   */
 
   stream.on('drain', onDrain)
-
   stream.write = 
     mac(stream.write)
     .returns(function (written) {
@@ -123,14 +148,28 @@ function pauseSpec (mac, stream, opts) {
   if(opts.strict)
     stream.on('data', function onData(data) {
       //stream must not emit data when paused!
-      a.ok(paused)
+      a.equal(paused, false, 'a strict pause stream *must not* emit \'data\' when paused')
     })
 }
 /*
   demand that the stream does not emit any data when paused
 */
-function strictPauseSpec (mac, stream) {
+function strictPauseSpec (mac, stream, opts) {
   opts = opts || {}
   opts.strict = true
-  pauseSpec(mac, stream, opts )
+  paused = false
+  if(!stream.readable)
+    throw new Error('strict pause does not make sense for a non-readable stream')
+
+  stream.pause = mac(stream.pause)
+    .isPassed(function () {
+      paused = true
+    })
+  stream.resume = mac(stream.resume)
+    .isPassed(function () {
+      paused = false
+    })
+  stream.on('data', function () {
+    a.equal(paused, false, 'a strict pausing stream must not emit data when paused')
+  })
 }
