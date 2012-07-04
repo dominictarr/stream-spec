@@ -1,0 +1,27 @@
+{
+  "name": "stream-spec",
+  "version": "0.0.0",
+  "description": "executable specification for Stream (to make testing streams easy)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dominictarr/stream-spec.git"
+  },
+  "keywords": [
+    "stream",
+    "spec",
+    "streams",
+    "test"
+  ],
+  "dependencies": {
+    "macgyver": "~1.6.1"
+  },
+  "author": "Dominic Tarr",
+  "license": [
+    "MIT",
+    "Apache2"
+  ]
+}
