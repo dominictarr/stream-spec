@@ -20,7 +20,7 @@ Stream implementations must satisify all relevant diagrams.
 ## write / pause
 
 ```
-write()===false              write()==false
+write()===true               write()==false
      .--.                         .--.
      |  |                         |  |
      |  v                         |  v
