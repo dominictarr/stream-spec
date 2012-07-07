@@ -103,7 +103,7 @@ pause(), resume()
 ```
 
 A unstrict `ReadableStream` should _try_ not to emit 'data' or 'end' when paused.  
-In `0.8` most core node streams are now strict.
+most streams are unstrict.
 
 ## readable / !readable
 
