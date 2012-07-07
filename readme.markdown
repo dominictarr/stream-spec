@@ -4,7 +4,7 @@
 it's purpose it to make it easy to test user-land streams have correct behavour.
 
 [illustrated](https://github.com/dominictarr/stream-spec/blob/master/states.markdown)
-[explained](https://github.com/dominictarr/stream-spec/blob/master/stream_spec.markdown)
+[explained](https://github.com/dominictarr/stream-spec/blob/master/stream_spec.md)
 
 
 ``` js
