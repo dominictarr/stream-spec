@@ -20,7 +20,7 @@ Stream implementations must satisify all relevant diagrams.
 ## write / pause
 
 ```
-write()===true               write()==false
+write()!==false               write()===false
      .--.                         .--.
      |  |                         |  |
      |  v                         |  v
@@ -31,9 +31,9 @@ write()===true               write()==false
   `---------`     'drain'      `--------`
                
 ```
-
 A `WritableStream` must emit `'drain'` to leave the paused state.
 A `WritableStream` may only return `false` from `write()` when paused.
+It is recommended that when a `WritableStream` in not paused, it should return `true`.
 
 ## writable/!writable
 
@@ -64,6 +64,10 @@ A `WritableStream` may not emit 'drain' or permit `write()` after `end()`, `'err
 or `destroy()` have occured. 
 A `WritableStream` must eventually emit `'close'`, unless there is an 'error'.
 
+`write()` may throw, if called when `!writable`, `end()` should just be ignored
+if called when `!writable`, in 0.8 and earlier [pipe](https://github.com/joyent/node/blob/master/lib/stream.js#L66) 
+does not check writable state before calling `end()`
+
 ## read / pause (strict)
 
 ```
@@ -80,7 +84,7 @@ A `WritableStream` must eventually emit `'close'`, unless there is an 'error'.
 ```
 
 A strict `ReadableStream` must not emit 'data' or 'end' when in the paused state.  
-In `0.8` most core node streams are now strict.
+In `0.8` node http streams are now strict.
 
 ## read / pause (loose)
 
