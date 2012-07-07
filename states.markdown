@@ -52,7 +52,7 @@ A `WritableStream` may only return `false` from `write()` when paused.
         |                          v
         |                     .-----------.
         |  'error'            |           |
-        `-------------------- | closed,   |
+        `-------------------->| closed,   |
                               | !writable |
                               |           |
                               `-----------`
@@ -118,7 +118,7 @@ In `0.8` most core node streams are now strict.
         |                          v
         |                     .-----------.
         |  'error'            |           |
-        `-------------------- | closed,   |
+        `-------------------->| closed,   |
                               | !readable |
                               |           |
                               `-----------`
