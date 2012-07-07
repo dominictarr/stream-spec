@@ -42,7 +42,7 @@ module.exports = function (stream) {
       try {
         mac.validate()
       } catch (err) {
-        console.error(err.stack)
+        console.error(err && err.stack)
         throw err
       }
     })
@@ -55,11 +55,13 @@ module.exports = function (stream) {
 function writableSpec (mac, stream, opts) {
   opts = opts || {end: true}
 
-  stream.end = mac(stream.end).once()
+  stream.end = mac(stream.end).returns(function () {
+    a.equal(stream.writable, false, 'stream must not be writable after end()')
+  })
   stream.write = 
     mac(stream.write)
     .throws(function (err, threw) {
-      a.equal(threw, !stream.writable)
+//      a.equal(threw, !stream.writable, 'write should throw if !writable')
     })
 
   var onClose = mac(function close(){}).once()
@@ -81,6 +83,9 @@ function readableSpec (mac, stream, opts) {
   var onClose = mac(function close(){}).once()
   var onError = mac(function error(){}).before(onClose)
   var onEnd   = mac(function end  (){}).before(onClose).before(onError)
+    .isPassed(function () {
+      a.equal(stream.readable, false, 'stream must not be readable on "end"')
+    })
   var onData  = mac(function data (){}).before(onEnd)
 
   stream.on('close', onClose)
@@ -132,19 +137,20 @@ function pauseSpec (mac, stream, opts) {
   */
 
   stream.on('drain', onDrain)
-  stream.write = 
-    mac(stream.write)
-    .returns(function (written) {
-      a.isBoolean(written, 'boolean')     //be strict.
+  if(stream.writable) {
+    stream.write = 
+      mac(stream.write)
+      .returns(function (written) {
+        a.isBoolean(written, 'boolean')     //be strict.
 
-      if(!paused && !written) {
-        //after write returns false, it must emit drain eventually.
-        //console.log('entered pause state by write() === false')
-        onDrain.again()
-      }
-      paused = !written
-    })
-
+        if(!paused && !written) {
+          //after write returns false, it must emit drain eventually.
+          //console.log('entered pause state by write() === false')
+          onDrain.again()
+        }
+        paused = !written
+      })
+  }
   if(opts.strict)
     stream.on('data', function onData(data) {
       //stream must not emit data when paused!
