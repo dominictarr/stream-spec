@@ -36,9 +36,9 @@ If `write` returns `false`,it *must* eventually emit `'drain'`. `write` returnin
 
 ### end()
 
-Calling `end` *may* set `writable` to `false`. 
-If the `Stream` is also readable, it *must* eventually emit `'end'`.
-the `Stream` *must* eventually emit `'close'` after `end()` is called (and `'end'` is emitted if also a readable `Stream`)
+Calling `end` *must* set `writable` to `false`. 
+If the `Stream` is also readable, it *must* eventually emit `'end'`, and then `'close'`.
+If the `Stream` in not also readable, it *must* eventually emit `'close'` but not emit `'end'`.
 
 ### destroy()
 
