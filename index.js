@@ -1,5 +1,6 @@
 var a = require('assertions')
 var macgyver = require('macgyver')
+var Stream = require('stream')
 
 function merge (to, from) {
   to = to || {}
@@ -11,6 +12,11 @@ function merge (to, from) {
 
 
 module.exports = function (stream, opts) {
+  
+  a.isInstanceof(stream, Stream)
+  a.property(stream,'pipe', a._isFunction())
+  a.property(stream,'destroy', a._isFunction())
+
   var mac = macgyver()
   var opts = merge(('string' == typeof opts ? {name: opts} : opts) || {}, {name: 'stream'})
   var spec = {}
