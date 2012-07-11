@@ -1,13 +1,22 @@
 var a = require('assertions')
 var macgyver = require('macgyver')
 
-module.exports = function (stream) {
-  var mac = macgyver()
-  var spec = {}
+function merge (to, from) {
+  to = to || {}
+  for (var k in from)
+    if('undefined' === typeof to[k])
+      to[k] = from[k]
+  return to
+}
 
+
+module.exports = function (stream, opts) {
+  var mac = macgyver()
+  var opts = merge(('string' == typeof opts ? {name: opts} : opts) || {}, {name: 'stream'})
+  var spec = {}
   function add(name, method) {
-    spec[name] = function (opts) {
-      method(mac, stream, opts)
+    spec[name] = function (_opts) {
+      method(mac, stream, merge(_opts, opts))
       return this
     }
   }
@@ -53,19 +62,28 @@ module.exports = function (stream) {
 }
 
 function writableSpec (mac, stream, opts) {
-  opts = opts || {end: true}
+  merge(opts, {end: true})
 
-  stream.end = mac(stream.end).returns(function () {
-    a.equal(stream.writable, false, 'stream must not be writable after end()')
-  })
+  a.isFunction(stream.end, opts.name + '.end *must* be a function')
+  a.equal(stream.writable, true, opts.name + '.writable *must* == true')
+  function e (n) { return opts.name + '.emit(\''+n+'\')' }
+  function n (n) { return opts.name + '.'+n+'()' }
+
+  stream.end = mac(stream.end, n('end')).returns(function () {
+    a.equal(stream.writable, false, opts.name + ' must not be writable after end()')
+  }).once()
   stream.write = 
-    mac(stream.write)
+    mac(stream.write, n('write'))
     .throws(function (err, threw) {
 //      a.equal(threw, !stream.writable, 'write should throw if !writable')
     })
 
-  var onClose = mac(function close(){}).once()
-  var onError = mac(function error(){}).before(onClose)
+  var onClose = mac(function (){
+    if(opts.debug) console.error(e('close'))
+  }, e('close')).once()
+  var onError = mac(function (err){
+    if(opts.debug) console.error(e('error'), err)
+  },  e('error')).before(onClose)
 
   stream.on('close', onClose)
   stream.on('error', onError)
@@ -78,15 +96,35 @@ function writableSpec (mac, stream, opts) {
 
 function readableSpec (mac, stream, opts) {
 
-  opts = opts || {end: true}
+  merge(opts, {end: true})
+  function e (n) { return opts.name + '.emit(\''+n+'\')' }
+  function n (n) { return opts.name + '.'+n+'()' }
 
-  var onClose = mac(function close(){}).once()
-  var onError = mac(function error(){}).before(onClose)
-  var onEnd   = mac(function end  (){}).before(onClose).before(onError)
-    .isPassed(function () {
-      a.equal(stream.readable, false, 'stream must not be readable on "end"')
-    })
-  var onData  = mac(function data (){}).before(onEnd)
+
+  var onError = mac(function (err){
+    //'error' means the same thing as 'close'.
+    onClose.maybeOnce()
+    if(opts.debug) console.error(e('error'), err)
+  },  e('error'))
+  //.before(onClose) error does not emit close, officially, yet.
+
+  var onEnd = mac(function end  (){
+    if(opts.debug) console.error(e('end'), err)
+  }, e('end'))
+  .once()
+
+  .isPassed(function () {
+    a.equal(stream.readable, false, 'stream must not be readable on "end"')
+  })
+
+  var onClose = mac(function (){
+    if(opts.debug) console.error(e('close'))
+  }, e('close'))
+  .once()
+
+  onEnd.before(onClose).before(onError)
+
+  var onData  = mac(function data (){}, e('data')).before(onEnd)
 
   stream.on('close', onClose)
   stream.on('end', onEnd)
@@ -108,7 +146,6 @@ function throughSpec (mac, stream, opts) {
 }
 
 function pauseSpec (mac, stream, opts) {
-  opts = opts || {}
   var paused = false
   function drain() {
     paused = false
@@ -161,7 +198,6 @@ function pauseSpec (mac, stream, opts) {
   demand that the stream does not emit any data when paused
 */
 function strictPauseSpec (mac, stream, opts) {
-  opts = opts || {}
   opts.strict = true
   paused = false
   if(!stream.readable)
