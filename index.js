@@ -21,13 +21,14 @@ module.exports = function (stream, opts) {
     }
   }
 
-  add('through', throughSpec)
-  add('readable', readableSpec)
-  add('writable', writableSpec)
-  add('basic', throughSpec)
-  add('readableWritable', throughSpec)
-  add('pausable', pauseSpec)
-  add('strictPausable', strictPauseSpec)
+  add('through'     , throughSpec)
+  add('basic'       , throughSpec) //legacy, remove this.
+  add('duplex'      , duplexSpec)
+  add('readable'    , readableSpec)
+  add('writable'    , writableSpec)
+  add('pausable'    , pauseSpec)
+  add('drainable'   , drainSpec)
+  add('strictPause' , strictSpec)
 
   spec.all = function (opts) {
     if(stream.writable && stream.readable)
@@ -62,8 +63,6 @@ module.exports = function (stream, opts) {
 }
 
 function writableSpec (mac, stream, opts) {
-  merge(opts, {end: true})
-
   a.isFunction(stream.end, opts.name + '.end *must* be a function')
   a.equal(stream.writable, true, opts.name + '.writable *must* == true')
   function e (n) { return opts.name + '.emit(\''+n+'\')' }
@@ -143,21 +142,59 @@ function readableSpec (mac, stream, opts) {
 function throughSpec (mac, stream, opts) {
   writableSpec(mac, stream, opts)
   readableSpec(mac, stream, opts)
+  throughPauseSpec(mac, stream, opts) 
 }
 
-function pauseSpec (mac, stream, opts) {
+function duplexSpec (mac, stream, opts) {
+  writableSpec(mac, stream, opts)
+  readableSpec(mac, stream, opts)
+  pauseSpec(mac, stream, opts) 
+  drainSpec(mac, stream, opts) 
+}
+
+function drainSpec (mac, stream, opts) {
   var paused = false
+  function e (n) { return opts.name + '.emit(\''+n+'\')' }
+  function n (n) { return opts.name + '.'+n+'()' }
+
   function drain() {
     paused = false
   } 
   var onDrain = mac(drain).never()
   
+  stream.on('drain', onDrain)
+  stream.write = 
+    mac(stream.write, n('write'))
+    .returns(function (written) {
+
+      if(!paused && !written) {
+        //after write returns false, it must emit drain eventually.
+        onDrain.again()
+      }
+      paused = (written === false)
+    })
+ 
+}
+
+//for through-streams
+
+function throughPauseSpec (mac, stream, opts) {
+  var paused = false
+
+  function e (n) { return opts.name + '.emit(\''+n+'\')' }
+  function n (n) { return opts.name + '.'+n+'()' }
+
+  function drain() {
+    paused = false
+  } 
+  var onDrain = mac(drain, e('drain')).never()
+  
   a.ok(stream.pause, 'stream *must* have pause')
 
   if(!stream.readable)
-    throw new Error('strict pause does not make sense for a non-readable stream')
+    throw new Error('pause does not make sense for a non-readable stream')
 
-  stream.pause = mac(stream.pause)
+  stream.pause = mac(stream.pause, n('pause'))
     .isPassed(function () {
       if(paused) return
       //console.log('entered pause state by pause()')
@@ -165,42 +202,34 @@ function pauseSpec (mac, stream, opts) {
       onDrain.again()
     })
 
-  /*
-  hmm, there is writable pause, and readable pause.
-  readable pause starts on pause() and ends on resume()
-  writable pause starts on write() === false, and ends on 'drain'
-
-  readable streams need not emit drain.
-  */
-
   stream.on('drain', onDrain)
-  if(stream.writable) {
-    stream.write = 
-      mac(stream.write)
-      .returns(function (written) {
-        a.isBoolean(written, 'boolean')     //be strict.
+  stream.write = 
+    mac(stream.write, n('write'))
+    .returns(function (written) {
 
-        if(!paused && !written) {
-          //after write returns false, it must emit drain eventually.
-          //console.log('entered pause state by write() === false')
-          onDrain.again()
-        }
-        paused = !written
-      })
-  }
+      if(!paused && !written) {
+        //after write returns false, it must emit drain eventually.
+        //console.log('entered pause state by write() === false')
+        onDrain.again()
+      }
+      paused = (written === false)
+    })
+
   if(opts.strict)
     stream.on('data', function onData(data) {
       //stream must not emit data when paused!
-      a.equal(paused, false, 'a strict pause stream *must not* emit \'data\' when paused')
+      a.equal(paused, false, 'a strict stream *must not* emit \'data\' when paused')
     })
 }
 /*
   demand that the stream does not emit any data when paused
 */
-function strictPauseSpec (mac, stream, opts) {
-  opts.strict = true
+function pauseSpec (mac, stream, opts) {
   paused = false
-  if(!stream.readable)
+  function e (n) { return opts.name + '.emit(\''+n+'\')' }
+  function n (n) { return opts.name + '.'+n+'()' }
+
+ if(!stream.readable)
     throw new Error('strict pause does not make sense for a non-readable stream')
 
   stream.pause = mac(stream.pause)
@@ -211,7 +240,12 @@ function strictPauseSpec (mac, stream, opts) {
     .isPassed(function () {
       paused = false
     })
-  stream.on('data', function () {
-    a.equal(paused, false, 'a strict pausing stream must not emit data when paused')
-  })
+  if(opts.strict)
+    stream.on('data', function () {
+      a.equal(paused, false, 'a strict pausing stream must not emit data when paused')
+    })
+}
+
+function strictSpec (mac, stream, opts) {
+  return pauseSpec(mac, stream, merge(opts, {strict: true}))
 }
