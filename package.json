@@ -4,7 +4,7 @@
   "description": "executable specification for Stream (to make testing streams easy)",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/writable.js; node test/readable.js"
   },
   "repository": {
     "type": "git",
