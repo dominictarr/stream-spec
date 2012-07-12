@@ -48,6 +48,7 @@ invalid(function () {
 //does not set readable = false, on 'end'
 invalid(function () {
   var s = new Stream()
+  s.destroy = function () {}
   s._end = function () {
     this.emit('end')
   }
@@ -59,6 +60,7 @@ invalid(function () {
 //does not set emit 'close'
 invalid(function () {
   var s = new Stream()
+  s.destroy = function () {}
   s._end = function () {
     this.readable = false
     this.emit('end')
@@ -70,6 +72,7 @@ invalid(function () {
 
 valid(function () {
   var s = new Stream()
+  s.destroy = function () {}
   s._end = function () {
     this.readable = false
     this.emit('end')

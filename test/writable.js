@@ -39,7 +39,8 @@ var invalid = checkValid(function (stream, spec) {
 
 var wrong1 = function () {
   var s = new Stream()
-  s.write = function (){ }
+  s.write = function () {}
+  s.destroy = function () {}
   //s.end = function () {}
   //s.writable = true
   return s 
@@ -48,6 +49,7 @@ var wrong2 = //fails because end isn't defined
 invalid(function () {
   var s = new Stream()
   s.write = function (){ }
+  s.destroy = function () {}
   //s.end = function () {}
   s.writable = true
   return s 
@@ -57,6 +59,7 @@ invalid(function () {
 invalid(function () {
   var s = new Stream()
   s.write = function (){ }
+  s.destroy = function () {}
   s.end = function () {}
   //s.writable = true
   return s 
@@ -67,6 +70,7 @@ invalid(function () {
 invalid(function () {
   var s = new Stream()
   s.write = function (){ }
+  s.destroy = function () {}
   s.end = function () {}
   s.writable = true
   return s 
@@ -79,6 +83,7 @@ invalid(function () {
 invalid(function () {
   var s = new Stream()
   s.write = function (){ }
+  s.destroy = function () {}
   s.end = function () {}
   s.writable = true
   return s 
@@ -90,6 +95,7 @@ invalid(function () {
 invalid(function () {
   var s = new Stream()
   s.write = function (){ }
+  s.destroy = function () {}
   s.end = function () {this.writable = false}
   s.writable = true
   return s 
@@ -102,6 +108,7 @@ invalid(function () {
 valid(function () {
   var s = new Stream()
   s.write = function (){ }
+  s.destroy = function () {}
   s.end = function () {
     this.writable = false
     this.emit('close')
