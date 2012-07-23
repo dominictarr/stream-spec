@@ -116,7 +116,9 @@ function readableSpec (mac, stream, opts) {
   var onEnd = mac(function end  (){
     if(opts.debug) console.error(e('end'), err)
   }, e('end'))
-  .once()
+
+  if(opts.end !== false)
+    onEnd.once()
 
   .isPassed(function () {
     a.equal(stream.readable, false, 'stream must not be readable on "end"')
@@ -126,6 +128,9 @@ function readableSpec (mac, stream, opts) {
     if(opts.debug) console.error(e('close'))
   }, e('close'))
   .once()
+
+  //on end must occur before onClose or onError
+  //that is to say, end MUST NOT occur after 'close' or 'error'
 
   onEnd.before(onClose).before(onError)
 
@@ -255,3 +260,4 @@ function pauseSpec (mac, stream, opts) {
 function strictSpec (mac, stream, opts) {
   return pauseSpec(mac, stream, merge(opts, {strict: true}))
 }
+
