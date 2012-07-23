@@ -43,12 +43,13 @@ is strongly recommended to implement `pause` and `resume`
 If the option `{strict: true}` is passed, it means the stream is not allowed to emit
 `'data'` or `'end'` when the stream is paused.
 
+If the option `{end: false}` is passed, then end may not be emitted.
+
 ``` js
 spec(stream)
   .readable()
   .pausable({strict: true})) //strict is optional.
   .validateOnExit()
-
 ```
 
 ### Through (sync writable and readable, aka: 'filter')

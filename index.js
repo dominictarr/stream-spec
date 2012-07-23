@@ -105,7 +105,6 @@ function readableSpec (mac, stream, opts) {
   function e (n) { return opts.name + '.emit(\''+n+'\')' }
   function n (n) { return opts.name + '.'+n+'()' }
 
-
   var onError = mac(function (err){
     //'error' means the same thing as 'close'.
     onClose.maybeOnce()
@@ -116,10 +115,6 @@ function readableSpec (mac, stream, opts) {
   var onEnd = mac(function end  (){
     if(opts.debug) console.error(e('end'), err)
   }, e('end'))
-
-  if(opts.end !== false)
-    onEnd.once()
-  else onEnd.never()
 
   .isPassed(function () {
     a.equal(stream.readable, false, 'stream must not be readable on "end"')
@@ -141,8 +136,8 @@ function readableSpec (mac, stream, opts) {
   stream.on('end', onEnd)
   stream.on('data', onData)
 
-  if(opts.end)
-    onEnd.once()
+  if(opts.end !== false) onEnd.once()
+  else onEnd.never()
 
   if(opts.error === false)
     onError.never()
