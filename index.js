@@ -119,6 +119,7 @@ function readableSpec (mac, stream, opts) {
 
   if(opts.end !== false)
     onEnd.once()
+  else onEnd.never()
 
   .isPassed(function () {
     a.equal(stream.readable, false, 'stream must not be readable on "end"')
