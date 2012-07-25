@@ -232,7 +232,7 @@ function throughPauseSpec (mac, stream, opts) {
   demand that the stream does not emit any data when paused
 */
 function pauseSpec (mac, stream, opts) {
-  paused = false
+  var paused = false
   function e (n) { return opts.name + '.emit(\''+n+'\')' }
   function n (n) { return opts.name + '.'+n+'()' }
 
