@@ -1,22 +1,38 @@
 # StreamSpec
 
-`stream-spec` is a executable specification for Stream.
+Automatic checking of the Stream implementations.
+`stream-spec` instruments your stream to verify that it has correct behaviour.
+All you need to do to test a stream is to wrap it with `stream-spec`, and then pipe
+some test data through it.
 it's purpose it to make it easy to test user-land streams have correct behavour.
 
-[illustrated](https://github.com/dominictarr/stream-spec/blob/master/states.markdown)
-[explained](https://github.com/dominictarr/stream-spec/blob/master/stream_spec.md)
+correct stream behaviour [illustrated](https://github.com/dominictarr/stream-spec/blob/master/states.markdown)  
 
+correct stream behaviour [explained](https://github.com/dominictarr/stream-spec/blob/master/stream_spec.md)  
+
+
+## a simple test
+
+using [stream-tester](https://github.com/dominictarr/stream-tester) 
 
 ``` js
 var spec = require('stream-spec')
+var tester = require('stream-tester')
+
 spec(stream)
-  .readableWritable({error: false})
-  .pausable()
+  .through({strict: true})
   .validateOnExit()
 
-stream.write('data')
-//...
+tester.createRandomStream(function () {
+    return 'line ' + Math.random() + '\n'
+  }, 1000)
+  .pipe(stream)
+  .pipe(tester.createPauseStream())
+
 ```
+
+send 1000 random lines through the stream and check that
+it buffers on pause.
 
 ## types of `Stream`
 
