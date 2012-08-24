@@ -10,6 +10,7 @@ correct stream behaviour [illustrated](https://github.com/dominictarr/stream-spe
 
 correct stream behaviour [explained](https://github.com/dominictarr/stream-spec/blob/master/stream_spec.md)  
 
+stream api design [style](https://github.com/dominictarr/stream-spec/blob/master/api-style.md) 
 
 ## a simple test
 
