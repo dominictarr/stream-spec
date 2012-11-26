@@ -10,7 +10,7 @@ correct stream behaviour [illustrated](https://github.com/dominictarr/stream-spe
 
 correct stream behaviour [explained](https://github.com/dominictarr/stream-spec/blob/master/stream_spec.md)  
 
-stream api design [style](https://github.com/dominictarr/stream-spec/blob/master/api-style.md) 
+stream api design [style](https://github.com/dominictarr/stream-spec/blob/master/api-style.markdown) 
 
 ## a simple test
 
@@ -72,7 +72,7 @@ spec(stream)
 ### Through (sync writable and readable, aka: 'filter')
 
 A `Stream` that is both readable and writable, and where the input is processed and then emitted as output, more or less directly. 
-Example, [zlib](http://nodejs.org/docs/api/zlib.html). contrast this with duplex stream.
+Example, [zlib](http://nodejs.org/api/zlib.html). contrast this with duplex stream.
 
 when you call `pause()` on a `ThroughStream`, it should change it into a paused state on the writable side also,
 and `write()===false`. Calling `resume()` should cause `'drain'` to be emitted eventually.
