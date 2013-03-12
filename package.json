@@ -18,8 +18,7 @@
     "test"
   ],
   "dependencies": {
-    "macgyver": "~1.6.1",
-    "assertions": "2.3"
+    "macgyver": "~1.6.1"
   },
   "author": "Dominic Tarr",
   "license": [
