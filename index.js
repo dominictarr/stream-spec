@@ -1,4 +1,4 @@
-var a = require('assertions')
+var a = require('assert')
 var macgyver = require('macgyver')
 var Stream = require('stream')
 
@@ -13,9 +13,9 @@ function merge (to, from) {
 
 module.exports = function (stream, opts) {
   
-  a.isInstanceof(stream, Stream)
-  a.property(stream,'pipe', a._isFunction())
-  a.property(stream,'destroy', a._isFunction())
+  a.ok(stream instanceof Stream)
+  a.ok('function', typeof stream.pipe)
+  a.ok('function', typeof stream.destroy)
 
   var mac = macgyver()
   var opts = merge(('string' == typeof opts ? {name: opts} : opts) || {}, {name: 'stream'})
@@ -69,7 +69,8 @@ module.exports = function (stream, opts) {
 }
 
 function writableSpec (mac, stream, opts) {
-  a.isFunction(stream.end, opts.name + '.end *must* be a function')
+  
+  a.ok('function', typeof stream.destroy, opts.name + '.end *must* be a function')
   a.equal(stream.writable, true, opts.name + '.writable *must* == true')
   function e (n) { return opts.name + '.emit(\''+n+'\')' }
   function n (n) { return opts.name + '.'+n+'()' }
