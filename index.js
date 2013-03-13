@@ -54,14 +54,17 @@ module.exports = function (stream, opts) {
     //your test framework probably has assigned a listener for on exit also,
     //make sure we are first. so the framework has a chance to detect a
     //validation error.
-    process.listeners('exit').unshift(function () {
-      try {
-        mac.validate()
-      } catch (err) {
-        console.error(err && err.stack)
-        throw err
-      }
-    })
+    if(process.listeners)
+      process.listeners('exit').unshift(function () {
+        try {
+          mac.validate()
+        } catch (err) {
+          console.error(err && err.stack)
+          throw err
+        }
+      })
+    else
+      setTimeout(mac.validate, 10e3)
     return this
   }
 
