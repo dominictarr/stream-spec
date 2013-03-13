@@ -1,6 +1,6 @@
 {
   "name": "stream-spec",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "executable specification for Stream (to make testing streams easy)",
   "main": "index.js",
   "scripts": {
