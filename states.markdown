@@ -1,6 +1,6 @@
 # Stream state diagrams.
 
-interperetation of these diagrams:
+interpretation of these diagrams:
 boxes are states. arrows are transitions.
 transitions are labled with the events which cause those
 transitions. if an event is mentioned on the diagram,
