@@ -89,7 +89,7 @@ spec(stream)
 ### Duplex
 
 A `Stream` that is both readable and writable, but the streams go off to some other place or thing,
-and are not coupled directly. The readable and writable side of a `DuplexStream` has thier own pause state.
+and are not coupled directly. The readable and writable side of a `DuplexStream` each have their own pause state.
 
 If the option `{strict: true}` is passed, it means the stream is not allowed to emit
 `'data'` or `'end'` when the stream is paused.
