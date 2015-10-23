@@ -21,8 +21,5 @@
     "macgyver": "~1.10"
   },
   "author": "Dominic Tarr",
-  "license": [
-    "MIT",
-    "Apache2"
-  ]
+  "license": "(MIT OR Apache-2.0)"
 }
